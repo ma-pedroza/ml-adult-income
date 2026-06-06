@@ -52,7 +52,7 @@ Classificação Supervisionada Binária.
 O objetivo é classificar cada indivíduo em uma das duas classes possíveis:
 
 * <=50K
-* > 50K
+* >50K
 
 ---
 
