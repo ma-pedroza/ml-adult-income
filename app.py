@@ -4,7 +4,7 @@ import pandas as pd
 
 st.set_page_config(
     page_title="Predição de Renda",
-    page_icon="💰",
+    page_icon="💹",
     layout="centered"
 )
 
@@ -14,20 +14,79 @@ colunas = joblib.load("colunas_modelo.joblib")
 
 num_cols = ["age", "educational-num", "capital-gain", "capital-loss", "hours-per-week"]
 
-educacao_map = {
-    "Ensino médio": ("HS-grad", 9),
-    "Alguma faculdade": ("Some-college", 10),
-    "Técnico/Associado": ("Assoc-voc", 11),
-    "Bacharelado": ("Bachelors", 13),
-    "Mestrado": ("Masters", 14),
-    "Doutorado": ("Doctorate", 16),
+educacao_num_map = {
+    "Preschool": 1,
+    "1st-4th": 2,
+    "5th-6th": 3,
+    "7th-8th": 4,
+    "9th": 5,
+    "10th": 6,
+    "11th": 7,
+    "12th": 8,
+    "HS-grad": 9,
+    "Some-college": 10,
+    "Assoc-voc": 11,
+    "Assoc-acdm": 12,
+    "Bachelors": 13,
+    "Masters": 14,
+    "Prof-school": 15,
+    "Doctorate": 16,
 }
 
-st.title("💰 Predição de Renda")
+escolaridades = sorted([
+    coluna.replace("education_", "")
+    for coluna in colunas
+    if coluna.startswith("education_")
+])
+
+paises = sorted([
+    coluna.replace("native-country_", "")
+    for coluna in colunas
+    if coluna.startswith("native-country_")
+])
+
+ocupacoes = sorted([
+    coluna.replace("occupation_", "")
+    for coluna in colunas
+    if coluna.startswith("occupation_")
+])
+
+estados_civis = sorted([
+    coluna.replace("marital-status_", "")
+    for coluna in colunas
+    if coluna.startswith("marital-status_")
+])
+
+relacionamentos = sorted([
+    coluna.replace("relationship_", "")
+    for coluna in colunas
+    if coluna.startswith("relationship_")
+])
+
+classes_trabalho = sorted([
+    coluna.replace("workclass_", "")
+    for coluna in colunas
+    if coluna.startswith("workclass_")
+])
+
+racas = sorted([
+    coluna.replace("race_", "")
+    for coluna in colunas
+    if coluna.startswith("race_")
+])
+
+st.title("💹 Predição de Renda")
 st.markdown(
     """
     Este aplicativo utiliza um modelo de **Machine Learning** treinado com o dataset
     **Adult Income** para prever se uma pessoa possui renda anual **maior ou menor que 50K**.
+    """
+)
+
+st.info(
+    """
+    ℹ️ Algumas categorias aparecem em inglês porque foram mantidas no formato original do dataset Adult Income.
+    Essa decisão foi tomada para preservar a consistência entre os dados de treinamento e as entradas utilizadas pelo modelo.
     """
 )
 
@@ -38,47 +97,82 @@ st.subheader("📋 Dados da pessoa")
 col1, col2 = st.columns(2)
 
 with col1:
-    idade = st.number_input("Idade", min_value=18, max_value=100, value=30)
-    horas = st.number_input("Horas trabalhadas por semana", min_value=1, max_value=100, value=40)
-    capital_gain = st.number_input("Ganho de capital", min_value=0, value=0)
-    genero = st.selectbox("Gênero", ["Masculino", "Feminino"])
+    idade = st.number_input(
+        "Idade",
+        min_value=18,
+        max_value=100,
+        value=30,
+    )
+
+    horas = st.number_input(
+        "Horas trabalhadas por semana",
+        min_value=1,
+        max_value=100,
+        value=40,
+    )
+
+    capital_gain = st.number_input(
+        "Ganho de capital",
+        min_value=0,
+        value=0,
+        help="Ganhos financeiros provenientes de investimentos, venda de ações, imóveis ou outros ativos."
+    )
+
+    genero = st.selectbox(
+        "Gênero",
+        ["Masculino", "Feminino"],
+    )
 
 with col2:
-    educacao_label = st.selectbox("Escolaridade", list(educacao_map.keys()))
-    estado_civil = st.selectbox(
-        "Estado civil",
-        ["Never-married", "Married-civ-spouse", "Separated", "Widowed"]
-    )
-    trabalho = st.selectbox(
-        "Classe de trabalho",
-        ["Private", "Local-gov", "State-gov", "Self-emp-inc", "Self-emp-not-inc"]
-    )
-    ocupacao = st.selectbox(
-        "Ocupação",
-        ["Prof-specialty", "Exec-managerial", "Craft-repair", "Sales", "Other-service", "Tech-support"]
+    educacao_label = st.selectbox(
+        "Escolaridade",
+        escolaridades,
     )
 
-capital_loss = st.number_input("Perda de capital", min_value=0, value=0)
+    estado_civil = st.selectbox(
+        "Estado civil",
+        estados_civis,
+    )
+
+    trabalho = st.selectbox(
+        "Classe de trabalho",
+        classes_trabalho,
+        help="Categoria do vínculo profissional da pessoa."
+    )
+
+    ocupacao = st.selectbox(
+        "Ocupação",
+        ocupacoes,
+        help="Função ou área profissional exercida pela pessoa."
+    )
+
+capital_loss = st.number_input(
+    "Perda de capital",
+    min_value=0,
+    value=0,
+    help="Perdas financeiras provenientes de investimentos ou venda de ativos."
+)
 
 relacionamento = st.selectbox(
     "Relacionamento",
-    ["Not-in-family", "Husband", "Wife", "Own-child", "Unmarried"]
+    relacionamentos,
 )
 
 raca = st.selectbox(
     "Raça",
-    ["White", "Black", "Asian-Pac-Islander", "Other"]
+    racas,
 )
 
 pais = st.selectbox(
     "País de origem",
-    ["United-States", "Mexico", "Canada", "Germany", "Philippines"]
+    paises,
 )
 
 st.divider()
 
 if st.button("🔎 Prever renda", use_container_width=True):
-    educacao, educacao_num = educacao_map[educacao_label]
+    educacao = educacao_label
+    educacao_num = educacao_num_map.get(educacao_label, 10)
 
     entrada = pd.DataFrame(0, index=[0], columns=colunas)
 
