@@ -196,8 +196,7 @@ py -3.11 -m streamlit run app.py
 
 ## Aplicação Publicada
 
-* Streamlit: COLOCAR_LINK_STREAMLIT
-* GitHub: COLOCAR_LINK_GITHUB
+* Streamlit: (https://ml-adult-income.streamlit.app/)
 
 ---
 
